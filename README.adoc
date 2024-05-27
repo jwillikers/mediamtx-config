@@ -1,0 +1,98 @@
+= MediaMTX Config
+Jordan Williams <jordan@jwillikers.com>
+:experimental:
+:icons: font
+ifdef::env-github[]
+:tip-caption: :bulb:
+:note-caption: :information_source:
+:important-caption: :heavy_exclamation_mark:
+:caution-caption: :fire:
+:warning-caption: :warning:
+endif::[]
+:MediaMTX: https://github.com/bluenviron/mediamtx[MediaMTX]
+
+My configuration for {MediaMTX}, a video streaming proxy server.
+
+== Usage
+
+This repository contains the configuration files for {MediaMTX}.
+The configuration is meant to be used with the containers from the https://github.com/jwillikers/home-lab-helm[Home Lab Helm] repository.
+
+. Create a `Projects` directory in the current user's home directory.
++
+[,sh]
+----
+mkdir --parents ~/Projects
+----
+
+. Clone this repository under `~/Projects`.
++
+[,sh]
+----
+git -C ~/Projects clone git@github.com:jwillikers/mediamtx-config.git
+----
+
+// . Determine the UID mappings inside the rootless user's namespace.
+// +
+// [,sh]
+// ----
+// podman unshare cat /proc/self/uid_map
+//          0        818          1
+//          1     655360      65536
+// ----
+
+// . Do the math to determine the UID outside of the container that is used for user inside the container.
+// In this case, the container defaults to UID 0 inside the container.
+// From the output of the previous command, we can see that UID 1 maps to UID 655360.
+// The following expression yields the UID outside of the container.
+// +
+// [,sh]
+// ----
+// math 655360 + 0 - 1
+// 655359
+// ----
+
+// . Make sure that files are owned by the subuid that will map to the `root` user in the container.
+// +
+// [,sh]
+// ----
+// sudo chown --recursive 655359 config
+// ----
+
+. Then mount the provided `mediamtx.yaml` file inside the MediaMTX server container at `/mediamtx.yaml`.
+
+== Publish a Stream
+
+A stream can be published to the server.
+The following example demonstrates how to publish an RTSP stream from a Raspberry Pi 5 using GStreamer.
+
+. Install the necessary dependencies.
++
+[,sh]
+----
+sudo apt install --yes libgstreamer1.0-dev libgstreamer-plugins-base1.0-dev libgstreamer-plugins-bad1.0-dev gstreamer1.0-plugins-base gstreamer1.0-plugins-good gstreamer1.0-plugins-bad gstreamer1.0-libav gstreamer1.0-plugins-ugly gstreamer1.0-tools gstreamer1.0-x gstreamer1.0-gl gstreamer1.0-plugins-base-apps libcamera-dev gstreamer1.0-libcamera gstreamer1.0-rtsp
+----
+
+. Use the `gst-launch-1.0` command to create a pipeline and publish the camera feed to the server.
++
+[,sh]
+----
+gst-launch-1.0 -v libcamerasrc ! video/x-raw, format=RGBx, width=1920, height=1080, framerate=30/1 ! timeoverlay ! videoconvert ! video/x-raw,format=I420 ! x264enc ! rtspclientsink location=rtsp://mediamtx.jwillikers.io:8554/detectionator
+----
+
+== Code of Conduct
+
+Please refer to the project's link:CODE_OF_CONDUCT.adoc[Code of Conduct].
+
+== License
+
+This repository is licensed under the https://www.gnu.org/licenses/gpl-3.0.html[GPLv3].
+Please refer to the bundled link:LICENSE.adoc[license].
+
+== Copyright
+
+© 2024 Jordan Williams
+
+== Authors
+
+mailto:{email}[{author}]
