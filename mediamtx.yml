@@ -688,6 +688,8 @@ paths:
   #   source: rtsp://my_camera
 
   detectionator:
+    source: publisher
+    sourceOnDemand: yes
 
   # Settings under path "all_others" are applied to all paths that
   # do not match another entry.

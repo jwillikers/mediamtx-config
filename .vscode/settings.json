@@ -11,6 +11,7 @@
         "libgstreamer",
         "mediamtx",
         "Nushell",
+        "openh",
         "rtsp",
         "rtspclientsink",
         "subuid",
