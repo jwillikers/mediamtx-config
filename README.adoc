@@ -29,7 +29,7 @@ mkdir --parents ~/Projects
 +
 [,sh]
 ----
-git -C ~/Projects clone git@github.com:jwillikers/mediamtx-config.git
+git -C ~/Projects clone https://github.com/jwillikers/mediamtx-config.git
 ----
 
 // . Determine the UID mappings inside the rootless user's namespace.
